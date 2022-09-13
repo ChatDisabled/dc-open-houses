@@ -3,7 +3,7 @@ QBCore.Commands.Add('createopenhouse', Lang:t('command.create_house'), {{name = 
     local HouseName = tostring(args[1])
     local Owner = QBCore.Functions.GetPlayer(tonumber(args[2]))
     if not Owner then Owner = QBCore.Functions.GetPlayerByCitizenId(tostring(args[2])) end
-    if not Owner then TriggerClientEvent('QBCore:Notify', src, Lang:t('error.owner_not_found'), 'error') return end
+    if not Owner then Notify(src, Lang:t('error.owner_not_found'), 'error') return end
     local Ped = GetPlayerPed(src)
     local PlayerCoords = GetEntityCoords(Ped)
     local PlayerHeading = GetEntityHeading(Ped)
@@ -22,7 +22,7 @@ QBCore.Commands.Add('createopenhouse', Lang:t('command.create_house'), {{name = 
     }
     SetResourceKvp('Openhouse_'..tostring(AmountOfHouses), json.encode(Config.OpenHouses[AmountOfHouses]))
     SetResourceKvpInt('Housescount', AmountOfHouses)
-    TriggerClientEvent('QBCore:Notify', src, Lang:t('success.create_house', {house = HouseName, owner = Owner.PlayerData.charinfo.firstname}), 'success')
+    Notify(src, Lang:t('success.create_house', {house = HouseName, owner = Owner.PlayerData.charinfo.firstname}), 'success')
     TriggerClientEvent('dc-open-houses:client:sync', -1, Config.OpenHouses)
     TriggerClientEvent('dc-open-houses:client:CreateBlip', Owner.PlayerData.source, PlayerCoords, HouseName)
 end, 'admin')
@@ -32,7 +32,7 @@ QBCore.Commands.Add('deleteallhouses', Lang:t('command.delete_all'), {}, false, 
     for i = 1, Lenght do
         DeleteResourceKvpNoSync('Openhouse_'..tostring(i))
     end
-    TriggerClientEvent('QBCore:Notify', source, Lang:t('info.deleted_houses', {amount = Lenght}))
+    Notify(source, Lang:t('info.deleted_houses', {amount = Lenght}))
     SetResourceKvpIntNoSync('Housescount', 0)
     FlushResourceKvp()
     Config.OpenHouses = {}
@@ -44,7 +44,7 @@ QBCore.Commands.Add('deleteopenhouse', Lang:t('command.delete_house'), {{name = 
         if Config.OpenHouses[i].house == tostring(args[1]) then
             DeleteResourceKvpNoSync('Openhouse_'..tostring(i))
             SetResourceKvpIntNoSync('Housescount', #Config.OpenHouses - 1)
-            TriggerClientEvent('QBCore:Notify', source, Lang:t('success.deleted_house', {house = tostring(args[1])}), 'success')
+            Notify(source, Lang:t('success.deleted_house', {house = tostring(args[1])}), 'success')
             local Owner = QBCore.Functions.GetPlayerByCitizenId(Config.OpenHouses[i].owner)
             TriggerClientEvent('dc-open-houses:client:DeleteBlip', Owner.PlayerData.source, Config.OpenHouses[i].center)
             table.remove(Config.OpenHouses, i)
@@ -62,8 +62,8 @@ QBCore.Commands.Add('addstash', Lang:t('command.create_stash'), {}, false, funct
     local ClosestHouse = Config.OpenHouses[ClosestHouseIndex]
     local Doors = {}
 
-    if not ClosestHouse then TriggerClientEvent('QBCore:Notify', src, Lang:t('error.not_nearby_house'), 'error') return end
-    if Player.PlayerData.citizenid ~= ClosestHouse.owner and not QBCore.Functions.HasPermission(src, 'admin') then TriggerClientEvent('QBCore:Notify', src, Lang:t('error.no_perms'), 'error') return end
+    if not ClosestHouse then Notify(src, Lang:t('error.not_nearby_house'), 'error') return end
+    if Player.PlayerData.citizenid ~= ClosestHouse.owner and not QBCore.Functions.HasPermission(src, 'admin') then Notify(src, Lang:t('error.no_perms'), 'error') return end
 
     local House = json.decode(GetResourceKvpString('Openhouse_'..tostring(ClosestHouseIndex)))
     for i = 1, #House.doors do
@@ -86,7 +86,7 @@ QBCore.Commands.Add('addstash', Lang:t('command.create_stash'), {}, false, funct
         spawn = vector4(House.spawn.x, House.spawn.y, House.spawn.z, House.spawn.w)
     }
     SetResourceKvp('Openhouse_'..tostring(ClosestHouseIndex), json.encode(Config.OpenHouses[ClosestHouseIndex]))
-    TriggerClientEvent('QBCore:Notify', src, Lang:t('success.create_stash', {house = Config.OpenHouses[ClosestHouseIndex].house}), 'success')
+    Notify(src, Lang:t('success.create_stash', {house = Config.OpenHouses[ClosestHouseIndex].house}), 'success')
     TriggerClientEvent('dc-open-houses:client:sync', -1, Config.OpenHouses)
 end)
 
@@ -97,8 +97,8 @@ QBCore.Commands.Add('addoutfit', Lang:t('command.create_outfit'), {}, false, fun
     local ClosestHouse = Config.OpenHouses[ClosestHouseIndex]
     local Doors = {}
 
-    if not ClosestHouse then TriggerClientEvent('QBCore:Notify', src, Lang:t('error.not_nearby_house'), 'error') return end
-    if Player.PlayerData.citizenid ~= ClosestHouse.owner and not QBCore.Functions.HasPermission(src, 'admin') then TriggerClientEvent('QBCore:Notify', src, Lang:t('error.no_perms'), 'error') return end
+    if not ClosestHouse then Notify(src, Lang:t('error.not_nearby_house'), 'error') return end
+    if Player.PlayerData.citizenid ~= ClosestHouse.owner and not QBCore.Functions.HasPermission(src, 'admin') then Notify(src, Lang:t('error.no_perms'), 'error') return end
 
     local House = json.decode(GetResourceKvpString('Openhouse_'..tostring(ClosestHouseIndex)))
     for i = 1, #House.doors do
@@ -121,7 +121,7 @@ QBCore.Commands.Add('addoutfit', Lang:t('command.create_outfit'), {}, false, fun
         spawn = vector4(House.spawn.x, House.spawn.y, House.spawn.z, House.spawn.w)
     }
     SetResourceKvp('Openhouse_'..tostring(ClosestHouseIndex), json.encode(Config.OpenHouses[ClosestHouseIndex]))
-    TriggerClientEvent('QBCore:Notify', src, Lang:t('success.create_outfit', {house = Config.OpenHouses[ClosestHouseIndex].house}), 'success')
+    Notify(src, Lang:t('success.create_outfit', {house = Config.OpenHouses[ClosestHouseIndex].house}), 'success')
     TriggerClientEvent('dc-open-houses:client:sync', -1, Config.OpenHouses)
 end)
 
@@ -132,8 +132,8 @@ QBCore.Commands.Add('addlogout', Lang:t('command.create_logout'), {}, false, fun
     local ClosestHouse = Config.OpenHouses[ClosestHouseIndex]
     local Doors = {}
 
-    if not ClosestHouse then TriggerClientEvent('QBCore:Notify', src, Lang:t('error.not_nearby_house'), 'error') return end
-    if Player.PlayerData.citizenid ~= ClosestHouse.owner and not QBCore.Functions.HasPermission(src, 'admin') then TriggerClientEvent('QBCore:Notify', src, Lang:t('error.no_perms'), 'error') return end
+    if not ClosestHouse then Notify(src, Lang:t('error.not_nearby_house'), 'error') return end
+    if Player.PlayerData.citizenid ~= ClosestHouse.owner and not QBCore.Functions.HasPermission(src, 'admin') then Notify(src, Lang:t('error.no_perms'), 'error') return end
 
     local House = json.decode(GetResourceKvpString('Openhouse_'..tostring(ClosestHouseIndex)))
     for i = 1, #House.doors do
@@ -156,7 +156,7 @@ QBCore.Commands.Add('addlogout', Lang:t('command.create_logout'), {}, false, fun
         spawn = vector4(House.spawn.x, House.spawn.y, House.spawn.z, House.spawn.w)
     }
     SetResourceKvp('Openhouse_'..tostring(ClosestHouseIndex), json.encode(Config.OpenHouses[ClosestHouseIndex]))
-    TriggerClientEvent('QBCore:Notify', src, Lang:t('success.create_logout', {house = Config.OpenHouses[ClosestHouseIndex].house}), 'success')
+    Notify(src, Lang:t('success.create_logout', {house = Config.OpenHouses[ClosestHouseIndex].house}), 'success')
     TriggerClientEvent('dc-open-houses:client:sync', -1, Config.OpenHouses)
 end)
 
@@ -167,8 +167,8 @@ QBCore.Commands.Add('addgarageopen', Lang:t('command.create_garage'), {}, false,
     local ClosestHouse = Config.OpenHouses[ClosestHouseIndex]
     local Doors = {}
 
-    if not ClosestHouse then TriggerClientEvent('QBCore:Notify', src, Lang:t('error.not_nearby_house'), 'error') return end
-    if Player.PlayerData.citizenid ~= ClosestHouse.owner and not QBCore.Functions.HasPermission(src, 'admin') then TriggerClientEvent('QBCore:Notify', src, Lang:t('error.no_perms'), 'error') return end
+    if not ClosestHouse then Notify(src, Lang:t('error.not_nearby_house'), 'error') return end
+    if Player.PlayerData.citizenid ~= ClosestHouse.owner and not QBCore.Functions.HasPermission(src, 'admin') then Notify(src, Lang:t('error.no_perms'), 'error') return end
 
     local House = json.decode(GetResourceKvpString('Openhouse_'..tostring(ClosestHouseIndex)))
     for i = 1, #House.doors do
@@ -191,7 +191,7 @@ QBCore.Commands.Add('addgarageopen', Lang:t('command.create_garage'), {}, false,
         spawn = vector4(House.spawn.x, House.spawn.y, House.spawn.z, House.spawn.w)
     }
     SetResourceKvp('Openhouse_'..tostring(ClosestHouseIndex), json.encode(Config.OpenHouses[ClosestHouseIndex]))
-    TriggerClientEvent('QBCore:Notify', src, Lang:t('success.create_garage', {house = Config.OpenHouses[ClosestHouseIndex].house}), 'success')
+    Notify(src, Lang:t('success.create_garage', {house = Config.OpenHouses[ClosestHouseIndex].house}), 'success')
     TriggerClientEvent('dc-open-houses:client:sync', -1, Config.OpenHouses)
 end)
 
@@ -200,7 +200,7 @@ QBCore.Commands.Add('adddoor', Lang:t('command.create_door'), {{name = 'Door Nam
     local ClosestHouseIndex = GetClosestHouseIndex(src)
     local ClosestHouse = Config.OpenHouses[ClosestHouseIndex]
 
-    if not ClosestHouse then TriggerClientEvent('QBCore:Notify', src, Lang:t('error.not_nearby_house'), 'error') return end
+    if not ClosestHouse then Notify(src, Lang:t('error.not_nearby_house'), 'error') return end
 
     local House = json.decode(GetResourceKvpString('Openhouse_'..tostring(ClosestHouseIndex)))
     local Doors = {}
@@ -229,7 +229,7 @@ QBCore.Commands.Add('adddoor', Lang:t('command.create_door'), {{name = 'Door Nam
         spawn = vector4(House.spawn.x, House.spawn.y, House.spawn.z, House.spawn.w)
     }
     SetResourceKvp('Openhouse_'..tostring(ClosestHouseIndex), json.encode(Config.OpenHouses[ClosestHouseIndex]))
-    TriggerClientEvent('QBCore:Notify', src, Lang:t('success.create_door', {house = Config.OpenHouses[ClosestHouseIndex].house}), 'success')
+    Notify(src, Lang:t('success.create_door', {house = Config.OpenHouses[ClosestHouseIndex].house}), 'success')
     TriggerClientEvent('dc-open-houses:client:sync', -1, Config.OpenHouses)
 end, 'admin')
 
@@ -238,14 +238,14 @@ QBCore.Commands.Add('givehousekeys', Lang:t('command.give_keys'), {{name = 'Targ
     local Player = QBCore.Functions.GetPlayer(src)
     local Target = QBCore.Functions.GetPlayer(tonumber(args[1]))
     if not Target then Target = QBCore.Functions.GetPlayerByCitizenId(tostring(args[1])) end
-    if not Target then TriggerClientEvent('QBCore:Notify', src, Lang:t('error.target_not_found'), 'error') return end
+    if not Target then Notify(src, Lang:t('error.target_not_found'), 'error') return end
     local ClosestHouseIndex = GetClosestHouseIndex(src)
     local ClosestHouse = Config.OpenHouses[ClosestHouseIndex]
     local Doors = {}
 
-    if not ClosestHouse then TriggerClientEvent('QBCore:Notify', src, Lang:t('error.not_nearby_house'), 'error') return end
-    if Player.PlayerData.citizenid ~= ClosestHouse.owner and not QBCore.Functions.HasPermission(src, 'admin') then TriggerClientEvent('QBCore:Notify', src, Lang:t('error.no_perms'), 'error') return end
-    if Player.PlayerData.citizenid == Target.PlayerData.citizenid then TriggerClientEvent('QBCore:Notify', src, Lang:t('error.cant_give_keys_to_self'), 'error') return end
+    if not ClosestHouse then Notify(src, Lang:t('error.not_nearby_house'), 'error') return end
+    if Player.PlayerData.citizenid ~= ClosestHouse.owner and not QBCore.Functions.HasPermission(src, 'admin') then Notify(src, Lang:t('error.no_perms'), 'error') return end
+    if Player.PlayerData.citizenid == Target.PlayerData.citizenid then Notify(src, Lang:t('error.cant_give_keys_to_self'), 'error') return end
 
     local House = json.decode(GetResourceKvpString('Openhouse_'..tostring(ClosestHouseIndex)))
     for i = 1, #House.doors do
@@ -270,7 +270,7 @@ QBCore.Commands.Add('givehousekeys', Lang:t('command.give_keys'), {{name = 'Targ
         spawn = vector4(House.spawn.x, House.spawn.y, House.spawn.z, House.spawn.w)
     }
     SetResourceKvp('Openhouse_'..tostring(ClosestHouseIndex), json.encode(Config.OpenHouses[ClosestHouseIndex]))
-    TriggerClientEvent('QBCore:Notify', src, Lang:t('success.give_keys', {target = Target.PlayerData.charinfo.firstname}), 'success')
+    Notify(src, Lang:t('success.give_keys', {target = Target.PlayerData.charinfo.firstname}), 'success')
     TriggerClientEvent('dc-open-houses:client:sync', -1, Config.OpenHouses)
 end)
 
@@ -279,14 +279,14 @@ QBCore.Commands.Add('removehousekeys', Lang:t('command.remove_keys'), {{name = '
     local Player = QBCore.Functions.GetPlayer(src)
     local Target = QBCore.Functions.GetPlayer(tonumber(args[1]))
     if not Target then Target = QBCore.Functions.GetPlayerByCitizenId(tostring(args[1])) end
-    if not Target then TriggerClientEvent('QBCore:Notify', src, Lang:t('error.target_not_found'), 'error') return end
+    if not Target then Notify(src, Lang:t('error.target_not_found'), 'error') return end
     local ClosestHouseIndex = GetClosestHouseIndex(src)
     local ClosestHouse = Config.OpenHouses[ClosestHouseIndex]
     local Doors = {}
 
-    if not ClosestHouse then TriggerClientEvent('QBCore:Notify', src, Lang:t('error.not_nearby_house'), 'error') return end
-    if Player.PlayerData.citizenid ~= ClosestHouse.owner and not QBCore.Functions.HasPermission(src, 'admin') then TriggerClientEvent('QBCore:Notify', src, Lang:t('error.no_perms'), 'error') return end
-    if Player.PlayerData.citizenid == Target.PlayerData.citizenid then TriggerClientEvent('QBCore:Notify', src, Lang:t('error.cant_remove_keys_from_self'), 'error') return end
+    if not ClosestHouse then Notify(src, Lang:t('error.not_nearby_house'), 'error') return end
+    if Player.PlayerData.citizenid ~= ClosestHouse.owner and not QBCore.Functions.HasPermission(src, 'admin') then Notify(src, Lang:t('error.no_perms'), 'error') return end
+    if Player.PlayerData.citizenid == Target.PlayerData.citizenid then Notify(src, Lang:t('error.cant_remove_keys_from_self'), 'error') return end
 
     local House = json.decode(GetResourceKvpString('Openhouse_'..tostring(ClosestHouseIndex)))
     for i = 1, #House.doors do
@@ -316,7 +316,7 @@ QBCore.Commands.Add('removehousekeys', Lang:t('command.remove_keys'), {{name = '
         spawn = vector4(House.spawn.x, House.spawn.y, House.spawn.z, House.spawn.w)
     }
     SetResourceKvp('Openhouse_'..tostring(ClosestHouseIndex), json.encode(Config.OpenHouses[ClosestHouseIndex]))
-    TriggerClientEvent('QBCore:Notify', src, Lang:t('success.remove_keys', {target = Target.PlayerData.charinfo.firstname}), 'success')
+    Notify(src, Lang:t('success.remove_keys', {target = Target.PlayerData.charinfo.firstname}), 'success')
     TriggerClientEvent('dc-open-houses:client:sync', -1, Config.OpenHouses)
 end)
 
