@@ -1,11 +1,11 @@
 QBCore = exports['qb-core']:GetCoreObject()
 
 function Notify( sid, message, msgtype )
-    if(Config.notify == "okok") do 
+    if(Config.notify == "okok") then 
         TriggerClientEvent('okokNotify:Alert', sid, "Housing", message, 2000, msgtype)
         return true
     end
-    if(Config.notify == "qb") do 
+    if(Config.notify == "qb") then 
         TriggerClientEvent('QBCore:Notify', sid,message, msgtype)
         return true
     end

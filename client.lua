@@ -83,11 +83,11 @@ local keycode = keydic[Config.InteractKey]
 
 
 function Notify( message, msgtype )
-    if(Config.notify == "okok") do 
+    if(Config.notify == "okok") then 
         exports['okokNotify']:Alert('Housing', message, 2000, msgtype)
         return true
     end
-    if(Config.notify == "qb") do 
+    if(Config.notify == "qb") then
         QBCore.Functions.Notify(message, msgtype)
         return true
     end
