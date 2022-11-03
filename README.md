@@ -10,7 +10,6 @@ It is expected that you have the latest version of [qb-doorlock](https://github.
 
 #### *Might* be supported in the future
 
-You can always find support [here](https://discord.gg/SqRsSsSskg) in our Discord.
 ### Donations are **greatly** appreciated
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/N4N4BE29E)
 
