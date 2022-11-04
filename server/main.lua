@@ -1,5 +1,18 @@
 QBCore = exports['qb-core']:GetCoreObject()
 
+function Notify( sid, message, msgtype )
+    if(Config.notify == "okok") then 
+        TriggerClientEvent('okokNotify:Alert', sid, "Housing", message, 2000, msgtype)
+        return true
+    end
+    if(Config.notify == "qb") then 
+        TriggerClientEvent('QBCore:Notify', sid,message, msgtype)
+        return true
+    end
+    print("[DC-Open-Houses] Notify type wasn't set properly. it should be qb or okok it is currently: " .. Config.notify)
+    return false
+end
+
 function GetClosestHouseIndex(source)
     local PlayerCoords = GetEntityCoords(GetPlayerPed(source))
     local ClosestHouseIndex
@@ -43,7 +56,7 @@ RegisterNetEvent('dc-open-houses:server:DoorInteract', function(HouseIndex, Door
     local House = Config.OpenHouses[HouseIndex]
 
     if #(PlayerCoords - House.doors[DoorIndex].coords) > 5 then return end
-    if not IsKeyholder(Player.PlayerData.citizenid, House) and Player.PlayerData.citizenid ~= House.owner then TriggerClientEvent('QBCore:Notify', src, Lang:t('error.not_keyholder'), 'error') return end
+    if not IsKeyholder(Player.PlayerData.citizenid, House) and Player.PlayerData.citizenid ~= House.owner then Notify(src, Lang:t('error.not_keyholder'), 'error') return end
 
     House.doors[DoorIndex].locked = LockState
     SetResourceKvp('Openhouse_'..tostring(HouseIndex), json.encode(House))
@@ -101,9 +114,9 @@ RegisterNetEvent('dc-open-houses:server:StoreCar', function(VehicleFuel, Vehicle
     local Vehicle = GetVehiclePedIsIn(Ped, false)
     local Belongs
 
-    if Vehicle == 0 then TriggerClientEvent('QBCore:Notify', src, Lang:t('error.not_in_car'), 'error') return end
-    if not House then TriggerClientEvent('QBCore:Notify', src, Lang:t('error.not_nearby_house'), 'error') return end
-    if not IsKeyholder(Player.PlayerData.citizenid, House) and Player.PlayerData.citizenid ~= House.owner then TriggerClientEvent('QBCore:Notify', src, Lang:t('error.not_keyholder'), 'error') return end
+    if Vehicle == 0 then Notify(src, Lang:t('error.not_in_car'), 'error') return end
+    if not House then Notify(src, Lang:t('error.not_nearby_house'), 'error') return end
+    if not IsKeyholder(Player.PlayerData.citizenid, House) and Player.PlayerData.citizenid ~= House.owner then Notify('QBCore:Notify', src, Lang:t('error.not_keyholder'), 'error') return end
     if #(PlayerCoords - House.garage) > 5 then return end
 
     local VehiclePlate = Trim(GetVehicleNumberPlateText(Vehicle))
@@ -111,14 +124,14 @@ RegisterNetEvent('dc-open-houses:server:StoreCar', function(VehicleFuel, Vehicle
     local VehicleEngine = GetVehicleEngineHealth(Vehicle)
     local VehicleBody = GetVehicleBodyHealth(Vehicle)
     local result = MySQL.single.await('SELECT * FROM player_vehicles WHERE plate = ? AND hash = ? AND state = ?', {VehiclePlate, VehicleModel, 0})
-    if not result then TriggerClientEvent('QBCore:Notify', src, Lang:t('error.not_owner_car'), 'error') return end
+    if not result then Notify(src, Lang:t('error.not_owner_car'), 'error') return end
     for i = 1, #House.keyholders do
         if House.keyholders[i] == result.citizenid then
             Belongs = true
         end
     end
     if House.owner == result.citizenid then Belongs = true end
-    if not Belongs then TriggerClientEvent('QBCore:Notify', src, Lang:t('error.dont_park_here'), 'error') return end
+    if not Belongs then Notify(src, Lang:t('error.dont_park_here'), 'error') return end
     MySQL.update('UPDATE player_vehicles SET state = ?, garage = ?, fuel = ?, engine = ?, body = ?, mods = ? WHERE plate = ? AND hash = ?', {1, House.house, VehicleFuel, VehicleEngine, VehicleBody, json.encode(VehicleProps), VehiclePlate, VehicleModel})
     TaskLeaveVehicle(Ped, Vehicle)
     TaskEveryoneLeaveVehicle(Vehicle) -- Doesn't work but hey. Once it does.
@@ -135,8 +148,8 @@ QBCore.Functions.CreateCallback('dc-open-houses:callback:PullVehicles', function
     local House = Config.OpenHouses[ClosestHouseIndex]
     local Vehicles = {}
 
-    if not House then TriggerClientEvent('QBCore:Notify', src, Lang:t('error.not_nearby_house'), 'error') return end
-    if not IsKeyholder(Player.PlayerData.citizenid, House) and Player.PlayerData.citizenid ~= House.owner then TriggerClientEvent('QBCore:Notify', src, Lang:t('error.not_keyholder'), 'error') return end
+    if not House then Notify(src, Lang:t('error.not_nearby_house'), 'error') return end
+    if not IsKeyholder(Player.PlayerData.citizenid, House) and Player.PlayerData.citizenid ~= House.owner then Notify(src, Lang:t('error.not_keyholder'), 'error') return end
     if #(PlayerCoords - House.garage) > 5 then return end
 
     local result = MySQL.query.await('SELECT * FROM player_vehicles WHERE garage = ? AND state = ?', {House.house, 1})
@@ -161,8 +174,8 @@ RegisterNetEvent('dc-open-houses:server:RetrieveCar', function(Data)
     local House = Config.OpenHouses[ClosestHouseIndex]
     local VehiclePlate = Data.plate
 
-    if not House then TriggerClientEvent('QBCore:Notify', src, Lang:t('error.not_nearby_house'), 'error') return end
-    if not IsKeyholder(Player.PlayerData.citizenid, House) and Player.PlayerData.citizenid ~= House.owner then TriggerClientEvent('QBCore:Notify', src, Lang:t('error.not_keyholder'), 'error') return end
+    if not House then Notify(src, Lang:t('error.not_nearby_house'), 'error') return end
+    if not IsKeyholder(Player.PlayerData.citizenid, House) and Player.PlayerData.citizenid ~= House.owner then Notify(src, Lang:t('error.not_keyholder'), 'error') return end
     if #(PlayerCoords - House.garage) > 5 then return end
 
     local result = MySQL.single.await('SELECT * FROM player_vehicles WHERE plate = ? AND state = ? AND garage = ?', {VehiclePlate, 1, House.house})
